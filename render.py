@@ -60,7 +60,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
         results = render(view, gaussians, pipeline, background)
         rendering = results["render"]
         gt = view.original_image[0:3, :, :]
-        gt_depth = view.original_depth.detach().cpu().numpy()
+        gt_depth = view.original_depth.detach().cpu().numpy() if view.original_depth is not None else np.zeros((view.image_height, view.image_width))
         torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
         torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
         tmp_depth = np.zeros_like(gt_depth)

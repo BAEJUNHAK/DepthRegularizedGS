@@ -12,14 +12,17 @@
 import os
 import sys
 import torch
-from pytorch3d.transforms.so3 import (
-    so3_exp_map,
-    so3_log_map,
-    so3_relative_angle,
-)
-from pytorch3d.renderer.cameras import (
-    SfMPerspectiveCameras,
-)
+try:
+    from pytorch3d.transforms.so3 import (
+        so3_exp_map,
+        so3_log_map,
+        so3_relative_angle,
+    )
+    from pytorch3d.renderer.cameras import (
+        SfMPerspectiveCameras,
+    )
+except ImportError:
+    print("[WARNING] pytorch3d not found — BundleAdjustment/360 features disabled")
 from glob import glob
 from PIL import Image
 from typing import NamedTuple
