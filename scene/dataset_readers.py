@@ -684,7 +684,10 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png", use_de
                            ply_path=ply_path)
     return scene_info
 
+from scene.custom_reader import readCustomBlenderSceneInfo
+
 sceneLoadTypeCallbacks = {
     "Colmap": readColmapSceneInfo,
-    "Blender" : readNerfSyntheticInfo
+    "Blender" : readNerfSyntheticInfo,
+    "CustomBlender": readCustomBlenderSceneInfo,
 }
