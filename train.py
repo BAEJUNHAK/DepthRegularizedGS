@@ -158,6 +158,21 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
                 gaussians.max_radii2D[visibility_filter] = torch.max(gaussians.max_radii2D[visibility_filter], radii[visibility_filter])
                 gaussians.add_densification_stats(viewspace_point_tensor, visibility_filter)
 
+                # Debug: check gradient values for densification diagnosis
+                if iteration % 500 == 0 and iteration <= 5000:
+                    g = viewspace_point_tensor.grad
+                    if g is not None:
+                        norms = torch.norm(g[visibility_filter, :2], dim=-1)
+                        above = (norms >= opt.densify_grad_threshold).sum().item()
+                        print(f"\n[DBG iter={iteration}] means2D grad: min={norms.min():.8f}, max={norms.max():.8f}, mean={norms.mean():.8f}, >threshold({opt.densify_grad_threshold}): {above}/{norms.shape[0]}")
+                        accum = gaussians.xyz_gradient_accum[visibility_filter].squeeze()
+                        denom = gaussians.denom[visibility_filter].squeeze()
+                        avg_grad = (accum / denom.clamp(min=1))
+                        print(f"[DBG iter={iteration}] accum_avg: min={avg_grad.min():.8f}, max={avg_grad.max():.8f}, mean={avg_grad.mean():.8f}")
+                        print(f"[DBG iter={iteration}] scene_extent={scene.cameras_extent:.4f}, scale_max={gaussians.get_scaling.max():.4f}, scale_mean={gaussians.get_scaling.mean():.4f}")
+                    else:
+                        print(f"\n[DBG iter={iteration}] viewspace_point_tensor.grad is None!")
+
                 if iteration > opt.densify_from_iter and iteration % opt.densification_interval == 0:
                     size_threshold = 20 if iteration > opt.opacity_reset_interval else None
                     gaussians.densify_and_prune(opt.densify_grad_threshold, 0.005, scene.cameras_extent, size_threshold)
